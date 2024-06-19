@@ -1,0 +1,77 @@
+#include <LiquidCrystal.h> // Memasukkan library untuk penggunaan LCD
+LiquidCrystal lcd(11, 10, 9, 8, 7, 6); // Menginisialisasi objek lcd dengan pin yang terhubung ke LCD
+
+#include <NewPing.h> // Memasukkan library untuk penggunaan sensor ultrasonik
+#define TRIGGER_PIN 13 // Mendefinisikan pin trigger untuk sensor ultrasonik
+#define ECHO_PIN 12 // Mendefinisikan pin echo untuk sensor ultrasonik
+NewPing ultrasonic(TRIGGER_PIN, ECHO_PIN); // Menginisialisasi objek ultrasonic dengan pin trigger dan echo
+
+#define ledaman 2 // Mendefinisikan pin untuk LED aman
+#define led1 3 // Mendefinisikan pin untuk LED 1
+#define led2 4 // Mendefinisikan pin untuk LED 2
+#define led3 5 // Mendefinisikan pin untuk LED 3
+
+int z = 0; // Variabel untuk menyimpan ketinggian air yang diukur
+int y = 500; // Variabel untuk nilai referensi maksimum ketinggian air
+long distance; // Variabel untuk menyimpan jarak hasil pengukuran sensor ultrasonik
+
+void setup() {
+  lcd.begin(16, 2); // Menginisialisasi LCD dengan 16 kolom dan 2 baris
+  lcd.setCursor(0, 0); // Mengatur posisi cursor pada kolom 0 baris 0
+  lcd.print("Fahmi Tri Ramadhani"); // Menampilkan nama pada LCD
+  lcd.setCursor(0, 1); // Mengatur posisi cursor pada kolom 0 baris 1
+  lcd.print("2108096086"); // Menampilkan nomor identitas pada LCD
+  delay(200); // Menunda eksekusi selama 200 milidetik
+  lcd.clear(); // Membersihkan tampilan LCD
+  lcd.setCursor(0, 0); // Mengatur posisi cursor pada kolom 0 baris 0
+  lcd.print("Pengukuran"); // Menampilkan teks "Pengukuran" pada LCD
+  lcd.setCursor(0, 1); // Mengatur posisi cursor pada kolom 0 baris 1
+  lcd.print("Ketinggian Air"); // Menampilkan teks "Ketinggian Air" pada LCD
+  Serial.begin(9600); // Memulai komunikasi serial dengan baud rate 9600
+  pinMode(ledaman, OUTPUT); // Mengatur pin ledaman sebagai output
+  pinMode(led1, OUTPUT); // Mengatur pin led1 sebagai output
+  pinMode(led2, OUTPUT); // Mengatur pin led2 sebagai output
+  pinMode(led3, OUTPUT); // Mengatur pin led3 sebagai output
+  delay(600); // Menunda eksekusi selama 600 milidetik
+  lcd.clear(); // Membersihkan tampilan LCD
+}
+
+void loop() {
+  delay(100); // Menunda eksekusi selama 100 milidetik
+  distance = ultrasonic.ping_cm(); // Mengukur jarak menggunakan sensor ultrasonik dan menyimpan hasilnya ke variabel distance
+  Serial.print("Hasil Sensor : "); // Menampilkan teks "Hasil Sensor : " pada serial monitor
+  Serial.print(distance); // Menampilkan hasil pengukuran jarak pada serial monitor
+  Serial.print(" cm"); // Menampilkan satuan cm pada serial monitor
+  Serial.print(" ");
+  z = y - distance; // Menghitung ketinggian air dengan mengurangi nilai referensi y dengan hasil pengukuran jarak
+  lcd.setCursor(0, 0); lcd.print("Ketinggian Air"); // Menampilkan teks "Ketinggian Air" pada baris pertama LCD
+  lcd.setCursor(0, 1); lcd.print("Tinggi :"); lcd.print(z); // Menampilkan ketinggian air pada baris kedua LCD
+  lcd.setCursor(14, 1); lcd.print("Cm"); // Menampilkan satuan cm pada posisi kolom 14 baris kedua LCD
+
+  // Mengatur status LED berdasarkan ketinggian air
+  if ((z <= 200) && (z > 0)) {
+    digitalWrite(ledaman, HIGH); // Menyalakan LED aman
+    digitalWrite(led1, LOW); // Mematikan LED 1
+    digitalWrite(led2, LOW); // Mematikan LED 2
+    digitalWrite(led3, LOW); // Mematikan LED 3
+    delay(200); // Menunda eksekusi selama 200 milidetik
+  } else if ((z <= 300) && (z > 200)) {
+    digitalWrite(led1, HIGH); // Menyalakan LED 1
+    digitalWrite(led2, LOW); // Mematikan LED 2
+    digitalWrite(led3, LOW); // Mematikan LED 3
+    digitalWrite(ledaman, LOW); // Mematikan LED aman
+    delay(200); // Menunda eksekusi selama 200 milidetik
+  } else if ((z <= 450) && (z >= 350)) {
+    digitalWrite(led2, HIGH); // Menyalakan LED 2
+    digitalWrite(led1, LOW); // Mematikan LED 1
+    digitalWrite(led3, LOW); // Mematikan LED 3
+    digitalWrite(ledaman, LOW); // Mematikan LED aman
+    delay(200); // Menunda eksekusi selama 200 milidetik
+  } else if (z > 450) {
+    digitalWrite(led3, HIGH); // Menyalakan LED 3
+    digitalWrite(led2, LOW); // Mematikan LED 2
+    digitalWrite(led1, LOW); // Mematikan LED 1
+    digitalWrite(ledaman, LOW); // Mematikan LED aman
+    delay(200); // Menunda eksekusi selama 200 milidetik
+  }
+}
